@@ -222,23 +222,3 @@ function startBattle () {
 
 
 startBattle()
-
-
-// const monster = new Monster('Лютый', 'computer') // Тип - 'computer'
-// const magican = new Magican('Евстафий', 'user', 10) // 10 - макс. здоровье игра, тип по умолчанию - 'user'
-
-// monster.changeMove()
-// magican.changeMove()
-
-// console.log(monster.currentMove)
-// console.log(magican.currentMove)
-
-// monster.DmgCalc(magican.currentMove)
-
-// let b = 0
-// console.log( 2 * ((b > 0 && b <= 100 ? 1 : b) / 100) )
-
-// let b = 50
-// console.log( 2 * ((b > 0 && b <= 100 ? 0 : 1) / 100) )
-
-// console.log( 2 * 0 )
