@@ -210,11 +210,11 @@ function startBattle () {
         }
 
         // Применяю приём обмена значениями переменных, чтобы на каждой итерации поочерёдность ходов менялась 
-        // если раскомментирова нижние строки, игроки будут делать ходы по очереди
+        // если раскомментировать нижние строки, игроки будут делать ходы по очереди
 
-        let temp = attackingFighter
-        attackingFighter = reflectingFighter
-        reflectingFighter = temp
+        //let temp = attackingFighter
+        //attackingFighter = reflectingFighter
+        //reflectingFighter = temp
 
         round++
     }
