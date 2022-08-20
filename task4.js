@@ -9,6 +9,7 @@ class Fighter {
         this.typePlayer = 'user' // Тип игрока 
         this.name = name
         this.moves = []
+        this.currentMove = undefined
     }
 
     movesCounter () {
@@ -42,11 +43,35 @@ class Fighter {
             this.moves[indexMove].moveCounter = 0
             console.log(`Вы выбрали ход - ${this.moves[indexMove].name}`)
 
-            return availableMoves[indexMove]
+            return this.moves[indexMove]
             
         }
-         
-        return move() // Возвращаем объект хода
+
+        this.currentMove = move()
+    }
+    
+    damageCalc (moveEnemy) {
+        
+        let physicDmg = moveEnemy.physicalDmg
+        let magicDmg = moveEnemy.magicDmg
+        let physicArmor = this.currentMove.physicArmorPercents
+        let magicArmor = this.currentMove.magicArmorPercents
+        
+        if (physicArmor == 100) {
+            this.maxHealth -= 0
+        } else if (physicArmor == 0) {
+            this.maxHealth -= physicDmg
+        } else if (physicArmor > 0 && physicArmor < 100) {
+            this.maxHealth -= physicDmg * (physicArmor / 100)
+        }
+
+        if (magicArmor == 100) {
+            this.maxHealth -= 0
+        } else if (magicArmor == 0) {
+            this.maxHealth -= magicDmg
+        } else if ( magicArmor > 0 && magicArmor < 100) {
+            this.maxHealth -= magicDmg * (magicDmg / 100)
+        }
     }
 }
 
@@ -137,40 +162,6 @@ class Magican extends Fighter {
 }
 
 
-const damageСalculation = (attacking, reflecting, fighter) => {
-
-    // Ф-я производит рассчёт урона для конкретного бойца (fighter)
-    // Бойцы в каждом раунде наносят друг другу урон, делаем взаиморассчёт уронов, исходя из параметров:
-    // "physicalDmg", "magicDmg", "physicArmorPercents", "magicArmorPercents".
-
-    // Расчёт для физического урона
-    if (reflecting.physicArmorPercents === 100) {
-        fighter.maxHealth -= 0
-    } else if (reflecting.physicArmorPercents != 0) {
-        if (attacking.physicalDmg != 0) {
-            fighter.maxHealth -= (attacking.physicalDmg / 100) * reflecting.physicArmorPercents
-        }
-    } else {
-        fighter.maxHealth -= attacking.physicalDmg
-    }
-
-    // Рассчёт для магического урона
-    if (reflecting.magicArmorPercents === 100) {
-        fighter.maxHealth -= 0
-    } else if (reflecting.magicArmorPercents != 0) {
-        if (attacking.magicDmg != 0) {
-            fighter.maxHealth -= (attacking.magicDmg / 100) * reflecting.magicArmorPercents
-        }
-    } else {
-        fighter.maxHealth -= attacking.magicDmg
-    }
-
-    console.log(`Здоровье ${fighter.name}: ${fighter.maxHealth}`)
-
-    return fighter.maxHealth // Возвращаем рассчётное здоровье текущего бойца
-}
-
-
 function startBattle () {
 
     //Создаем объекты бойцов
@@ -189,26 +180,31 @@ function startBattle () {
         console.log(`********************* РАУНД ${round} **********************\n`)
 
         // Игроки делают ход (компьютер выбирает ход рандомно)
-        let moveAttacking = attackingFighter.changeMove()
+        // let moveAttacking = attackingFighter.changeMove()
+        attackingFighter.changeMove()
         console.log('***********************************************************\n')
 
-        let moveReflecting = reflectingFighter.changeMove() // пользователь выбирает ход сам
+        // let moveReflecting = reflectingFighter.changeMove() // пользователь выбирает ход сам
+        let enemyMove = reflectingFighter.changeMove()
         console.log('***********************************************************\n')
-       
-        let attakingFighterHealth = damageСalculation(moveAttacking, moveReflecting, attackingFighter) //Рассчёт урона для атакующего
-        let reflectingFighterHealth = damageСalculation(moveReflecting, moveAttacking, reflectingFighter) //Рассчёт урона для отражающего
+
+        attackingFighter.damageCalc(reflectingFighter.currentMove) // рассчёт урона для атакующего
+        reflectingFighter.damageCalc(attackingFighter.currentMove) // рассчёт урона для защищающегося
 
         // Зарускаем счётчик для восстановления ходов, на каждой итерации у каждого хода,
         // moveCounter увеличивается на 1, когда moveCounter = cooldown ход снова становиться доступным
         attackingFighter.movesCounter()
         reflectingFighter.movesCounter()
 
-        if (attakingFighterHealth <= 0) {
+        console.log(`Здоровье ${attackingFighter.name}: `, attackingFighter.maxHealth)
+        console.log(`Здоровье ${reflectingFighter.name}: `, reflectingFighter.maxHealth)
+
+        if (attackingFighter.maxHealth <= 0) {
             console.log(reflectingFighter.name, ' : Победил!')
             gameOver = true
         }
 
-        if (reflectingFighterHealth <= 0) {
+        if (reflectingFighter.maxHealth <= 0) {
             console.log(attackingFighter.name, ' : Победил!')
             gameOver = true
         }
@@ -216,9 +212,9 @@ function startBattle () {
         // Применяю приём обмена значениями переменных, чтобы на каждой итерации поочерёдность ходов менялась 
         // если раскомментирова нижние строки, игроки будут делать ходы по очереди
 
-        // let temp = attackingFighter
-        // attackingFighter = reflectingFighter
-        // reflectingFighter = temp
+        let temp = attackingFighter
+        attackingFighter = reflectingFighter
+        reflectingFighter = temp
 
         round++
     }
@@ -226,3 +222,23 @@ function startBattle () {
 
 
 startBattle()
+
+
+// const monster = new Monster('Лютый', 'computer') // Тип - 'computer'
+// const magican = new Magican('Евстафий', 'user', 10) // 10 - макс. здоровье игра, тип по умолчанию - 'user'
+
+// monster.changeMove()
+// magican.changeMove()
+
+// console.log(monster.currentMove)
+// console.log(magican.currentMove)
+
+// monster.DmgCalc(magican.currentMove)
+
+// let b = 0
+// console.log( 2 * ((b > 0 && b <= 100 ? 1 : b) / 100) )
+
+// let b = 50
+// console.log( 2 * ((b > 0 && b <= 100 ? 0 : 1) / 100) )
+
+// console.log( 2 * 0 )
